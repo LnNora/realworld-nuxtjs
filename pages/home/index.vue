@@ -147,6 +147,10 @@ export default {
   methods: {
     async onFavorite (article) {
       article.favoriteDisabled = true
+      if ( !this.user ) {
+        this.$router.push({ name: 'login' })
+        return
+      }
       if (article.favorited) {
         await deleteFavorite(article.slug)
         article.favorited = false

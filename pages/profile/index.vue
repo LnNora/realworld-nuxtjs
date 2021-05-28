@@ -9,14 +9,14 @@
             <img :src="profile.image" class="user-img" />
             <h4>{{ profile.username }}</h4>
             <p>{{ profile.bio }}</p>
-            <button v-if="user && user.username !== username" class="btn btn-sm btn-outline-secondary action-btn">
-            <i class="ion-plus-round"></i>
-            &nbsp;
-            Follow {{ profile.username }} 
-            </button>
-            <nuxt-link v-else  :to="{ name: 'settings' }" class="btn btn-sm btn-outline-secondary action-btn">
+            <nuxt-link v-if="user && user.username === username"  :to="{ name: 'settings' }" class="btn btn-sm btn-outline-secondary action-btn">
               <i class="ion-gear-a"></i> Edit Profile Settings
             </nuxt-link>
+            <button v-else @click="follow" :disabled = followDisabled class="btn btn-sm btn-outline-secondary action-btn">
+            <i class="ion-plus-round"></i>
+            &nbsp;
+            {{ !profile.following ? 'Follow' : 'Unfollow' }} {{ profile.username }} 
+            </button>
         </div>
 
         </div>
@@ -92,14 +92,13 @@
 </template>
 
 <script>
-import { getProfile } from '@/api/user'
+import { getProfile, follow } from '@/api/user'
 import { getArticles, addFavorite, deleteFavorite } from '@/api/article'
 import { mapState } from 'vuex'
 
 
 export default {
   watchQuery: ['page', 'tab'],
-  middleware: 'authenticated',
   name: 'UserProfile',
   async asyncData ({ params, query, store }) {
     const { tab = 'my' } = query
@@ -121,6 +120,10 @@ export default {
     const { profile } = profileRes.data
     const { articles, articlesCount } = articleRes.data
 
+    articles.forEach(article => {
+      article.favoriteDisabled = false
+    })
+
 
     return {
       username,
@@ -129,7 +132,8 @@ export default {
       articlesCount,
       limit,
       page,
-      tab
+      tab,
+      followDisabled: false
     }
   },
   computed: {
@@ -141,6 +145,10 @@ export default {
   methods: {
     async onFavorite (article) {
       article.favoriteDisabled = true
+      if ( !this.user ) {
+        this.$router.push({ name: 'login' })
+        return
+      }
       if (article.favorited) {
         await deleteFavorite(article.slug)
         article.favorited = false
@@ -163,6 +171,22 @@ export default {
       console.log(data)
       this.articles = data.articles
       this.articlesCount = data.articlesCount
+    },
+    async follow () {
+      if ( !this.user ) {
+        this.$router.push({ name: 'login' })
+        return
+      }
+      try {
+        this.followDisabled = true
+        const { data } = await follow(this.username)
+        console.log(data)
+        this.profile.following = !this.profile.following
+      } catch {
+
+      }
+      this.followDisabled = false
+      
     }
   }
 }

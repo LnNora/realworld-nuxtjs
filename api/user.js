@@ -26,3 +26,11 @@ export const getProfile = username => {
     url: `/api/profiles/${username}`
   })
 }
+
+// 关注作者/api/profiles/:username/follow
+export const follow = username => {
+  return request({
+    method: 'POST',
+    url: `/api/profiles/${username}/follow`
+  })
+}
