@@ -28,6 +28,10 @@
                 </button>
             </fieldset>
             </form>
+            <hr>
+            <button class="btn btn-outline-danger" @click="logout">
+                 Or click here to logout.
+            </button>
         </div>
 
         </div>
@@ -36,9 +40,20 @@
 </template>
 
 <script>
+// 仅在客户端加载js-cookie包
+const Cookie = process.client ? require('js-cookie') : undefined
+
 export default {
   middleware: 'authenticated',
-  name: 'SettingIndex'
+  name: 'SettingIndex',
+  methods: {
+    logout () {
+      this.$store.commit('setUser', null)
+      Cookie.remove('user')
+      // 跳转到首页
+      this.$router.push('/')
+    }
+  }
 }
 </script>
 
