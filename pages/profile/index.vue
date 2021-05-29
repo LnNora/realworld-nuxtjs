@@ -98,7 +98,7 @@ import { mapState } from 'vuex'
 
 
 export default {
-  watchQuery: ['page', 'tab'],
+  watchQuery: ['page', 'tab', 'username'],
   name: 'UserProfile',
   async asyncData ({ params, query, store }) {
     const { tab = 'my' } = query

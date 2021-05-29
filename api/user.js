@@ -19,6 +19,15 @@ export const register = data => {
 }
 
 
+// 修改用户信息
+export const modifyUser = data => {
+  return request({
+    method: 'PUT',
+    url: '/api/user',
+    data
+  })
+}
+
 // 获取用户信息
 export const getProfile = username => {
   return request({
@@ -27,7 +36,7 @@ export const getProfile = username => {
   })
 }
 
-// 关注作者/api/profiles/:username/follow
+// 关注作者
 export const follow = username => {
   return request({
     method: 'POST',
