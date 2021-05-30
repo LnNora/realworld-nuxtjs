@@ -50,6 +50,15 @@ export const getComments = slug => {
   })
 }
 
+// 提交文章评论POST /api/articles/:slug/comments
+export const createComment = (slug, data) => {
+  return request({
+    method: 'POST',
+    url: `/api/articles/${slug}/comments`,
+    data
+  })
+}
+
 // 创建文章
 export const createArticle = data => {
   return request({
