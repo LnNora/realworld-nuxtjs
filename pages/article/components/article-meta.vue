@@ -25,7 +25,9 @@
         </template>
         <!--如果未登录或已登录但是别人的文章-->
         <template v-else>
-          <button 
+          <button
+            @click="follow"
+            :disabled = "followDisabled"
             class="btn btn-sm btn-outline-secondary"
             :class="{
               active: article.author.following
@@ -33,10 +35,12 @@
             >
               <i class="ion-plus-round"></i>
               &nbsp;
-              Follow {{article.author.username}} <span class="counter">(10)</span>
+              {{ article.author.following ? 'Unfollow' : 'Follow' }} {{article.author.username}} <span class="counter">(10)</span>
           </button>
           &nbsp;&nbsp;
           <button 
+            @click="onFavorite()"
+            :disabled = article.favoriteDisabled
             class="btn btn-sm btn-outline-primary"
             :class="{
               active: article.favorited
@@ -51,7 +55,8 @@
 </template>
 
 <script>
-import { deleteArticle } from '@/api/article.js'
+import { deleteArticle, deleteFavorite, addFavorite } from '@/api/article.js'
+import { follow } from '@/api/user'
 import { mapState } from 'vuex'
 export default {
   name: 'ArticleMeta',
@@ -61,6 +66,12 @@ export default {
       required: true
     }
   },
+  data () {
+    return {
+      followDisabled: false,
+      favoriteDisabled: false
+    }
+  },
   computed: {
     ...mapState(['user'])
   },
@@ -68,7 +79,40 @@ export default {
     async onDelete () {
       await deleteArticle(this.article.slug)
       this.$router.push({ name: 'home' })
-    }
+    },
+    async follow () {
+      if ( !this.user ) {
+        this.$router.push({ name: 'login' })
+        return
+      }
+      try {
+        this.followDisabled = true
+        const { data } = await follow(this.article.author.username)
+        console.log(data)
+        this.article.author.following = !this.article.author.following
+      } catch {
+
+      }
+      this.followDisabled = false
+    },
+    async onFavorite () {
+      const article = this.article
+      this.favoriteDisabled = true
+      if ( !this.user ) {
+        this.$router.push({ name: 'login' })
+        return
+      }
+      if (article.favorited) {
+        await deleteFavorite(article.slug)
+        article.favorited = false
+        article.favoritesCount -= 1
+      } else {
+        await addFavorite(article.slug)
+        article.favorited = true
+        article.favoritesCount += 1
+      }
+      this.favoriteDisabled = false
+    },
   }
 }
 </script>
