@@ -2,7 +2,7 @@
   <div>
     <form class="card comment-form" @submit.prevent="onSubmit">
       <div class="card-block">
-        <textarea v-model="comment.body" class="form-control" placeholder="Write a comment..." rows="3"></textarea>
+        <textarea v-model="comment.body" class="form-control" placeholder="Write a comment..." rows="3" required></textarea>
       </div>
       <div class="card-footer">
         <img :src="user.image" class="comment-author-img" />
@@ -78,6 +78,7 @@ export default {
     async onSubmit () {
       const { data } = await createComment(this.article.slug, { comment: this.comment })
       this.comments.unshift(data.comment)
+      this.comment.body = ''
     }
   }
 }
